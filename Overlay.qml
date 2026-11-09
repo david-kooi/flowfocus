@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import QtQuick.Controls as Controls
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -25,6 +26,8 @@ Item {
   readonly property real topFallbackY: 36 + Style.gapsOut * 2
   property string searchText: ""
   property string newTaskText: ""
+  property string editSpaceId: ""
+  property string editSpaceName: ""
 
   // ---- Paths ----
   readonly property string home: Quickshell.env("HOME") || ""
@@ -418,7 +421,7 @@ Item {
   }
 
   // True while typing in any overlay input — letter shortcuts stay off
-  readonly property bool typing: boardSearch.activeFocus || addBox.activeFocus || notesPath.activeFocus
+  readonly property bool typing: spaceNameInput.activeFocus || boardSearch.activeFocus || addBox.activeFocus || notesPath.activeFocus
 
   function taskMatches(task) {
     var q = root.searchText.trim().toLowerCase()
@@ -503,9 +506,9 @@ Item {
       id: keyGrab
       anchors.fill: parent
       focus: root.opened
-      Keys.onSpacePressed: function(event) { if (root.typing) return; root.toggleTimer(); event.accepted = true }
+      Keys.onSpacePressed: function(event) { if (root.typing || renameSpace.visible || confirmDeleteSpace.opened) return; root.toggleTimer(); event.accepted = true }
       Keys.onPressed: function(event) {
-        if (root.typing || root.delDoneOpen || confirmDeleteTask.opened) return
+        if (root.typing || root.delDoneOpen || confirmDeleteTask.opened || confirmDeleteSpace.opened || renameSpace.visible) return
         var k = (event.text || "").toLowerCase()
         if (k === "m") { root.toggleMute(); event.accepted = true }
         else if (k === "f") { root.setView("focus"); event.accepted = true }
@@ -537,6 +540,42 @@ Item {
         enabled: root.opened
         onActivated: root.handleEscape()
       }
+    }
+
+    Controls.Popup {
+      id: renameSpace
+      anchors.centerIn: parent
+      modal: true
+      focus: true
+      padding: Style.space(16)
+      background: Rectangle { color: Theme.Color.popups.background; border.color: Theme.Color.popups.text; radius: Style.cornerRadius }
+      onOpened: { spaceNameInput.text = root.editSpaceName; spaceNameInput.forceActiveFocus(); spaceNameInput.selectAll() }
+      function save() {
+        if (!spaceNameInput.text.trim()) return
+        root.state = Model.renameKanbanProfile(root.state, root.editSpaceId, spaceNameInput.text)
+        root.ovApply()
+        close()
+      }
+      contentItem: Column {
+        spacing: Style.space(8)
+        Text { text: "Rename space"; color: Theme.Color.popups.text; font.family: Style.font.family; font.pixelSize: Style.font.body }
+        TextField { id: spaceNameInput; width: Style.space(260); maximumLength: 30; onAccepted: renameSpace.save() }
+        Row {
+          spacing: Style.space(8)
+          Button { text: "Cancel"; onClicked: renameSpace.close() }
+          Button { text: "Rename"; enabled: spaceNameInput.text.trim().length > 0; onClicked: renameSpace.save() }
+        }
+      }
+    }
+
+    ConfirmDialog {
+      id: confirmDeleteSpace
+      anchors.fill: parent
+      z: 100
+      message: "Delete space \"" + root.editSpaceName + "\" and " + Model.tasksForProfile(root.state, root.editSpaceId).length + " tasks? Vault file kept. This cannot be undone."
+      confirmText: "Delete"
+      onConfirmed: { root.state = Model.deleteKanbanProfile(root.state, root.editSpaceId); root.ovApply(); opened = false }
+      onCanceled: opened = false
     }
 
     // Delete confirm (plain tasks)
@@ -1109,6 +1148,21 @@ Item {
                     selected: modelData.id === root.activeProfileId
                     fontSize: Style.font.caption
                     onClicked: root.setActiveProfile(modelData.id)
+                    onRightClicked: spaceMenu.popup()
+                    SpaceMenu {
+                      id: spaceMenu
+                      canDelete: modelData.id !== "default"
+                      onRenameRequested: {
+                        root.editSpaceId = modelData.id
+                        root.editSpaceName = modelData.name
+                        renameSpace.open()
+                      }
+                      onDeleteRequested: {
+                        root.editSpaceId = modelData.id
+                        root.editSpaceName = modelData.name
+                        confirmDeleteSpace.opened = true
+                      }
+                    }
                     anchors.verticalCenter: parent.verticalCenter
                   }
                 }
@@ -1580,6 +1634,8 @@ Item {
   }
 
   function handleEscape() {
+    if (renameSpace.visible) { renameSpace.close(); return }
+    if (confirmDeleteSpace.opened) { confirmDeleteSpace.opened = false; return }
     if (root.delDoneOpen) { root.closeDeleteDone(); return }
     if (confirmDeleteTask.opened) { confirmDeleteTask.opened = false; root.delTaskId = ""; root.delTaskText = ""; return }
     if (root.typing) { keyGrab.forceActiveFocus(); return }
