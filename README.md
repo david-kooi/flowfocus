@@ -38,6 +38,22 @@ omarchy-shell shell summon flowfocus '{"view":"kanban"}'  # open Board / todo / 
 
 Popup (bar widget): `Space` start/pause, `Tab` cycle views, `M` mute, `Alt+H/L` spaces, `?` help. Tasks: `← →` move, `▲ ▼` prioritize, `⬆` push to notes (`↩` undo), `−` delete, `●` focus.
 
+## Agent CLI
+
+Requires Node.js; no npm dependencies. See [AGENTS.md](AGENTS.md) for the full
+agent workflow and persistence/concurrency details.
+
+```bash
+node bin/flowfocus.js space create "Project Alpha"
+node bin/flowfocus.js task create "Review proposal" --space "Project Alpha"
+node bin/flowfocus.js task create "Task in the default space"
+node bin/flowfocus.js task list
+node bin/flowfocus.js task move TASK_ID doing
+```
+
+Supported columns: `backlog`, `todo` (or `"to do"`), `doing`, `done`.
+Use `space list` to find space IDs and `--help` for all options.
+
 ## Configure
 
 Bar settings UI, or `shell.json` `flowfocus` entry:
