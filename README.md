@@ -1,6 +1,6 @@
 # FocusFlow
 
-Pomodoro timer + To-Do / Kanban for [Omarchy](https://omarchy.org) — a bar widget with a quick popup plus a fullscreen workspace overlay.
+Pomodoro timer + To-Do / Kanban for [Omarchy](https://omarchy.org) — a bar widget with a quick popup plus a desktop workspace window.
 
 ![FocusFlow board](assets/preview.png)
 
@@ -19,9 +19,9 @@ omarchy bar move flowfocus --section right
 
 ## Usage
 
-Bar: **Click** opens the workspace overlay, **Right-click** starts/pauses, **Middle-click** resets.
+Bar: **Click** opens the workspace window, **Right-click** starts/pauses, **Middle-click** resets.
 
-Overlay (`SUPER + SHIFT + T` toggles it, `Esc` closes):
+Window (`SUPER + SHIFT + T` toggles it, `Esc` closes):
 
 ```bash
 omarchy-shell shell summon flowfocus '{"view":"kanban"}'  # open Board / todo / settings directly
@@ -34,7 +34,7 @@ omarchy-shell shell summon flowfocus '{"view":"kanban"}'  # open Board / todo / 
 | `F` / `K` / `T` / `S` | Jump to Focus / Kanban / To-Do / Setup |
 | `M` | Mute / unmute all sound |
 | `Alt+H` / `Alt+L` | Previous / next space |
-| `Esc` | Close overlay |
+| `Esc` | Close window |
 
 Popup (bar widget): `Space` start/pause, `Tab` cycle views, `M` mute, `Alt+H/L` spaces, `?` help. Tasks: `← →` move, `▲ ▼` prioritize, `⬆` push to notes (`↩` undo), `−` delete, `●` focus.
 

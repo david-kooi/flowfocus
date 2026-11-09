@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Commons as Theme
 import qs.Ui
 import "Model.js" as Model
 
@@ -37,9 +38,9 @@ BarWidget {
   readonly property string phase: timer.phase
   readonly property int remainingSec: timer.remainingSec
   readonly property real timerProgress: Model.progress(state)
-  // Theme-safe: never Color.muted (near-invisible on light themes like rose-pine).
-  readonly property color dimText: Qt.darker(Color.foreground, 1.4)
-  readonly property color phaseColor: Model.phaseColor(phase, Color.accent, dimText, Color.urgent)
+  // Theme-safe: never Theme.Color.muted (near-invisible on light themes like rose-pine).
+  readonly property color dimText: Qt.darker(Theme.Color.foreground, 1.4)
+  readonly property color phaseColor: Model.phaseColor(phase, Theme.Color.accent, dimText, Theme.Color.urgent)
   readonly property string displayText: Model.formatTime(remainingSec)
   readonly property var activeTask: {
     var id = timer.activeTaskId
@@ -635,7 +636,7 @@ BarWidget {
         id: icon
         anchors.centerIn: parent
         text: "\uf254"
-        color: root.isRunning ? root.phaseColor : (root.bar ? root.bar.barForeground : Color.foreground)
+        color: root.isRunning ? root.phaseColor : (root.bar ? root.bar.barForeground : Theme.Color.foreground)
         font.family: root.bar ? root.bar.fontFamily : Style.font.family
         font.pixelSize: Math.min(parent.width * 0.62, Style.font.iconLarge)
         font.bold: false

@@ -1,8 +1,10 @@
 import QtQuick
+import QtQuick.Window
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.Commons
+import qs.Commons as Theme
 import qs.Ui
 import "Model.js" as Model
 
@@ -42,7 +44,7 @@ Item {
   readonly property string phase: timer.phase
   readonly property int remainingSec: timer.remainingSec
   readonly property real timerProgress: Model.progress(state)
-  readonly property color phaseColor: Model.phaseColor(phase, Color.accent, Qt.darker(Color.foreground, 1.4), Color.urgent)
+  readonly property color phaseColor: Model.phaseColor(phase, Theme.Color.accent, Qt.darker(Theme.Color.popups.text, 1.4), Theme.Color.urgent)
   readonly property string displayText: Model.formatTime(remainingSec)
   readonly property string activeProfileId: state.activeKanbanProfileId || "default"
   readonly property var profiles: state.kanbanProfiles || []
@@ -62,7 +64,7 @@ Item {
   property int vaultImportDup: 0
   property int vaultImportSkipped: 0
   property var vaultImportPending: []
-  readonly property color dimText: Qt.darker(Color.foreground, 1.4)
+  readonly property color dimText: Qt.darker(Theme.Color.popups.text, 1.4)
   readonly property var activeTask: {
     var id = timer.activeTaskId
     if (!id) return null
@@ -472,21 +474,22 @@ Item {
   }
 
   // ---- Window ----
-  PanelWindow {
+  Window {
     id: win
     visible: root.opened
-    anchors { top: true; bottom: true; left: true; right: true }
-    color: "transparent"
-    WlrLayershell.namespace: "flowfocus-workspace"
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: root.opened ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    exclusionMode: ExclusionMode.Ignore
+    title: "FocusFlow"
+    transientParent: null
+    flags: Qt.Window
+    width: 1060
+    height: 760
+    color: Theme.Color.popups.background
+    onClosing: function(close) { close.accepted = false; root.close() }
 
     // Scrim — click closes
     Rectangle {
       anchors.fill: parent
       visible: root.opened
-      color: Qt.rgba(Color.background.r, Color.background.g, Color.background.b, 0.72)
+      color: Qt.rgba(Theme.Color.popups.background.r, Theme.Color.popups.background.g, Theme.Color.popups.background.b, 0.72)
       MouseArea {
         anchors.fill: parent
         onClicked: root.close()
@@ -555,15 +558,15 @@ Item {
       visible: root.delDoneOpen
       Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(Color.background.r, Color.background.g, Color.background.b, 0.7)
+        color: Qt.rgba(Theme.Color.popups.background.r, Theme.Color.popups.background.g, Theme.Color.popups.background.b, 0.7)
         MouseArea { anchors.fill: parent; onClicked: root.closeDeleteDone() }
         Rectangle {
           width: Math.min(parent.width - 64, 420)
           height: doneCol.implicitHeight + 36
           anchors.centerIn: parent
           radius: Style.cornerRadius
-          color: Color.background
-          border.color: Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.4)
+          color: Theme.Color.popups.background
+          border.color: Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.4)
           border.width: 1
           MouseArea { anchors.fill: parent; onClicked: {} }
           Column {
@@ -575,7 +578,7 @@ Item {
               width: parent.width
               wrapMode: Text.WordWrap
               text: "Done — \"" + root.delTaskText + "\" is finished. Archive as - [x] in notes and remove from board, or delete everywhere?"
-              color: Color.popups.text
+              color: Theme.Color.popups.text
               font.family: Style.font.family
               font.pixelSize: Style.font.bodySmall
             }
@@ -590,14 +593,14 @@ Item {
               }
               Button {
                 text: "Archive [x]"
-                foreground: Color.accent
+                foreground: Theme.Color.accent
                 selected: true
                 fontSize: Style.font.caption
                 onClicked: { if (root.delTaskId) root.archiveDoneTask(root.delTaskId); root.closeDeleteDone() }
               }
               Button {
                 text: "Delete all"
-                foreground: Color.urgent
+                foreground: Theme.Color.urgent
                 fontSize: Style.font.caption
                 onClicked: { if (root.delTaskId) root.deleteTask(root.delTaskId); root.closeDeleteDone() }
               }
@@ -607,21 +610,14 @@ Item {
       }
     }
 
-    // Compact workspace card — pinned below the top bar like other Omarchy
-    // popups (calendar etc.), never floating mid-screen. With an anchor
-    // payload (bar click) it centers on the widget; otherwise (keybind) it
-    // centers horizontally. BorderSurface + theme border spec so it matches
-    // other Omarchy surfaces.
+    // Fill the desktop window with the workspace.
     BorderSurface {
       id: card
       visible: root.opened
-      width: Math.min(parent.width - 80, 980)
-      height: Math.min(parent.height - 140, 620)
-      x: root.anchorX < 0 ? (parent.width - width) / 2 : Math.max(Style.gapsOut, Math.min(root.anchorX - width / 2, parent.width - width - Style.gapsOut))
-      y: root.anchorX < 0 ? root.topFallbackY : ((root.barPos === "top" || root.barPos === "") ? root.anchorBarH + Style.gapsOut : parent.height - root.anchorBarH - Style.gapsOut - height)
+      anchors.fill: parent
       radius: Style.cornerRadius
-      color: Color.background
-      borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+      color: Theme.Color.popups.background
+      borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
       MouseArea { anchors.fill: parent; onClicked: {} }
 
       Column {
@@ -638,7 +634,7 @@ Item {
           Text {
             id: tbMark
             text: "\uf254"
-            color: Color.accent
+            color: Theme.Color.accent
             font.family: Style.font.family
             font.pixelSize: Style.font.title
             anchors.verticalCenter: parent.verticalCenter
@@ -646,7 +642,7 @@ Item {
           Text {
             id: tbName
             text: "FocusFlow"
-            color: Color.popups.text
+            color: Theme.Color.popups.text
             font.family: Style.font.family
             font.pixelSize: Style.font.title
             font.bold: true
@@ -668,7 +664,7 @@ Item {
           Button {
             id: bellBtn
             text: root.ovSettings.soundMuted ? "\uf1f6" : "\uf0f3"
-            foreground: root.ovSettings.soundMuted ? Color.urgent : root.dimText
+            foreground: root.ovSettings.soundMuted ? Theme.Color.urgent : root.dimText
             tooltipText: "Mute all sound (M)"
             onClicked: root.toggleMute()
             anchors.verticalCenter: parent.verticalCenter
@@ -677,7 +673,7 @@ Item {
             id: syncBtn
             text: !root.ovSettings.obsidianEnabled ? "Sync off" : (root.profilePendingPush > 0 ? ("Sync · " + root.profilePendingPush) : "Synced ✓")
             fontSize: Style.font.caption
-            foreground: (root.ovSettings.obsidianEnabled && root.profilePendingPush > 0) ? Color.accent : root.dimText
+            foreground: (root.ovSettings.obsidianEnabled && root.profilePendingPush > 0) ? Theme.Color.accent : root.dimText
             tooltipText: !root.ovSettings.obsidianEnabled ? "Notes export off — open Setup" : (root.profilePendingPush > 0 ? (root.profilePendingPush + " pending — open Setup to sync") : "All pushed — open Setup")
             onClicked: root.setView("settings")
             anchors.verticalCenter: parent.verticalCenter
@@ -713,13 +709,13 @@ Item {
                 width: 64
                 height: 48
                 radius: Style.cornerRadius
-                color: root.view === modelData.id ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.14) : Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.04)
-                border.color: root.view === modelData.id ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.35) : Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.30)
+                color: root.view === modelData.id ? Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.14) : Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.04)
+                border.color: root.view === modelData.id ? Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.35) : Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.30)
                 border.width: 1
                 Text {
                   anchors.centerIn: parent
                   text: modelData.key
-                  color: root.view === modelData.id ? Color.accent : root.dimText
+                  color: root.view === modelData.id ? Theme.Color.accent : root.dimText
                   font.family: Style.font.family
                   font.pixelSize: Style.font.title
                   font.bold: true
@@ -752,18 +748,18 @@ Item {
                 width: Math.round(parent.width * 0.58)
                 height: parent.height
                 radius: Style.cornerRadius
-                color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.04)
-                borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+                color: Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.04)
+                borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
                 Column {
                   anchors.fill: parent
                   anchors.margins: Style.space(12)
                   spacing: Style.space(8)
                   Row {
                     spacing: Style.space(6)
-                    Text { text: "●"; color: Color.accent; font.pixelSize: Style.font.caption }
+                    Text { text: "●"; color: Theme.Color.accent; font.pixelSize: Style.font.caption }
                     Text {
                       text: "Focus Mode"
-                      color: Color.accent
+                      color: Theme.Color.accent
                       font.family: Style.font.family
                       font.pixelSize: Style.font.body
                       font.bold: true
@@ -806,7 +802,7 @@ Item {
                       spacing: 0
                       Text {
                         text: root.displayText
-                        color: Color.popups.text
+                        color: Theme.Color.popups.text
                         font.family: Style.font.family
                         font.pixelSize: Style.font.displayLarge
                         font.bold: true
@@ -814,7 +810,7 @@ Item {
                       }
                       Text {
                         text: Model.phaseLabel(root.phase)
-                        color: Color.accent
+                        color: Theme.Color.accent
                         font.family: Style.font.family
                         font.pixelSize: Style.font.bodySmall
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -835,7 +831,7 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     Button {
                       text: root.isRunning ? "Pause" : (root.isPaused ? "Resume" : "Start")
-                      foreground: Color.accent
+                      foreground: Theme.Color.accent
                       selected: true
                       fontSize: Style.font.body
                       horizontalPadding: Style.space(16)
@@ -854,10 +850,10 @@ Item {
                   Row {
                     width: parent.width
                     spacing: Style.space(4)
-                    Text { text: "●"; color: Color.accent; font.pixelSize: Style.font.caption; anchors.verticalCenter: parent.verticalCenter }
+                    Text { text: "●"; color: Theme.Color.accent; font.pixelSize: Style.font.caption; anchors.verticalCenter: parent.verticalCenter }
                     Text {
                       text: "Work " + Math.round((root.ovSettings.workSec || 1500) / 60) + "m"
-                      color: Color.popups.text
+                      color: Theme.Color.popups.text
                       font.family: Style.font.family
                       font.pixelSize: Style.font.caption
                       anchors.verticalCenter: parent.verticalCenter
@@ -895,8 +891,8 @@ Item {
                   width: parent.width
                   height: progBoxCol.implicitHeight + Style.space(20)
                   radius: Style.cornerRadius
-                  color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.04)
-                  borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+                  color: Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.04)
+                  borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
                   Column {
                     id: progBoxCol
                     anchors.fill: parent
@@ -908,7 +904,7 @@ Item {
                       Text {
                         id: progTitle
                         text: "Today's Progress"
-                        color: Color.popups.text
+                        color: Theme.Color.popups.text
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
                         font.bold: true
@@ -929,21 +925,21 @@ Item {
                       Rectangle {
                         anchors.fill: parent
                         radius: 3
-                        color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.12)
+                        color: Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.12)
                       }
                       Rectangle {
                         height: parent.height
                         width: parent.width * (root.profileTasks.length > 0 ? root.profileDoneCount / root.profileTasks.length : 0)
                         radius: 3
-                        color: Color.accent
+                        color: Theme.Color.accent
                       }
                     }
                     Row {
                       width: parent.width
                       spacing: Style.space(16)
-                      Column { spacing: 0; Text { text: String(root.profileFocusedCount); color: Color.popups.text; font.family: Style.font.family; font.pixelSize: Style.font.title; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } Text { text: "Focused 🍅"; color: root.dimText; font.family: Style.font.family; font.pixelSize: Style.font.caption; anchors.horizontalCenter: parent.horizontalCenter } }
-                      Column { spacing: 0; Text { text: String(root.profilePendingPush); color: Color.popups.text; font.family: Style.font.family; font.pixelSize: Style.font.title; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } Text { text: "To sync"; color: root.dimText; font.family: Style.font.family; font.pixelSize: Style.font.caption; anchors.horizontalCenter: parent.horizontalCenter } }
-                      Column { spacing: 0; Text { text: String(root.profiles.length); color: Color.popups.text; font.family: Style.font.family; font.pixelSize: Style.font.title; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } Text { text: "Spaces"; color: root.dimText; font.family: Style.font.family; font.pixelSize: Style.font.caption; anchors.horizontalCenter: parent.horizontalCenter } }
+                      Column { spacing: 0; Text { text: String(root.profileFocusedCount); color: Theme.Color.popups.text; font.family: Style.font.family; font.pixelSize: Style.font.title; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } Text { text: "Focused 🍅"; color: root.dimText; font.family: Style.font.family; font.pixelSize: Style.font.caption; anchors.horizontalCenter: parent.horizontalCenter } }
+                      Column { spacing: 0; Text { text: String(root.profilePendingPush); color: Theme.Color.popups.text; font.family: Style.font.family; font.pixelSize: Style.font.title; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } Text { text: "To sync"; color: root.dimText; font.family: Style.font.family; font.pixelSize: Style.font.caption; anchors.horizontalCenter: parent.horizontalCenter } }
+                      Column { spacing: 0; Text { text: String(root.profiles.length); color: Theme.Color.popups.text; font.family: Style.font.family; font.pixelSize: Style.font.title; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } Text { text: "Spaces"; color: root.dimText; font.family: Style.font.family; font.pixelSize: Style.font.caption; anchors.horizontalCenter: parent.horizontalCenter } }
                     }
                   }
                 }
@@ -951,15 +947,15 @@ Item {
                   width: parent.width
                   height: parent.height - progBoxCol.parent.height - parent.spacing
                   radius: Style.cornerRadius
-                  color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.04)
-                  borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+                  color: Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.04)
+                  borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
                   Column {
                     anchors.fill: parent
                     anchors.margins: Style.space(10)
                     spacing: Style.space(6)
                     Text {
                       text: "Quick Settings"
-                      color: Color.popups.text
+                      color: Theme.Color.popups.text
                       font.family: Style.font.family
                       font.pixelSize: Style.font.body
                       font.bold: true
@@ -977,7 +973,7 @@ Item {
                         spacing: Style.space(6)
                         Text {
                           text: modelData.label
-                          color: Color.popups.text
+                          color: Theme.Color.popups.text
                           font.family: Style.font.family
                           font.pixelSize: Style.font.caption
                           elide: Text.ElideRight
@@ -999,7 +995,7 @@ Item {
                           width: 44
                           horizontalAlignment: Text.AlignHCenter
                           text: modelData.interval ? String(root.ovSettings[modelData.key] || 4) : (Math.round((root.ovSettings[modelData.key] || 1500) / 60) + modelData.suffix)
-                          color: Color.popups.text
+                          color: Theme.Color.popups.text
                           font.family: Style.font.family
                           font.pixelSize: Style.font.caption
                           anchors.verticalCenter: parent.verticalCenter
@@ -1038,7 +1034,7 @@ Item {
                   text: "Kanban"
                   id: kanbanTab
                   visible: root.viewEnabled("kanban")
-                  foreground: root.view === "kanban" ? Color.accent : root.dimText
+                  foreground: root.view === "kanban" ? Theme.Color.accent : root.dimText
                   selected: root.view === "kanban"
                   fontSize: Style.font.bodySmall
                   onClicked: root.setView("kanban")
@@ -1048,7 +1044,7 @@ Item {
                   text: "To-Do"
                   id: todoTab
                   visible: root.viewEnabled("todo")
-                  foreground: root.view === "todo" ? Color.accent : root.dimText
+                  foreground: root.view === "todo" ? Theme.Color.accent : root.dimText
                   selected: root.view === "todo"
                   fontSize: Style.font.bodySmall
                   onClicked: root.setView("todo")
@@ -1083,7 +1079,7 @@ Item {
                 Button {
                   id: addBtn
                   text: "+ Add Task"
-                  foreground: Color.accent
+                  foreground: Theme.Color.accent
                   selected: true
                   fontSize: Style.font.bodySmall
                   onClicked: { root.addTask(root.newTaskText, "todo"); root.newTaskText = "" }
@@ -1109,7 +1105,7 @@ Item {
                   delegate: Button {
                     required property var modelData
                     text: modelData.name
-                    foreground: modelData.id === root.activeProfileId ? Color.accent : root.dimText
+                    foreground: modelData.id === root.activeProfileId ? Theme.Color.accent : root.dimText
                     selected: modelData.id === root.activeProfileId
                     fontSize: Style.font.caption
                     onClicked: root.setActiveProfile(modelData.id)
@@ -1118,7 +1114,7 @@ Item {
                 }
                 Button {
                   text: "+"
-                  foreground: Color.accent
+                  foreground: Theme.Color.accent
                   fontSize: Style.font.caption
                   tooltipText: "New space (creates with input text)"
                   onClicked: { if (root.newTaskText.trim() !== "") { root.createProfile(root.newTaskText.trim().slice(0, 30)); root.newTaskText = "" } }
@@ -1143,8 +1139,8 @@ Item {
                     BorderSurface {
                       anchors.fill: parent
                       radius: Style.cornerRadius
-                      color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.045)
-                      borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+                      color: Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.045)
+                      borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
                     }
                     Column {
                       anchors.fill: parent
@@ -1153,7 +1149,7 @@ Item {
                       Row {
                         width: parent.width
                         spacing: Style.space(6)
-                        Text { id: dotW; text: "●"; color: colTasks.length > 0 ? Color.accent : root.dimText; font.pixelSize: Style.font.caption; anchors.verticalCenter: parent.verticalCenter }
+                        Text { id: dotW; text: "●"; color: colTasks.length > 0 ? Theme.Color.accent : root.dimText; font.pixelSize: Style.font.caption; anchors.verticalCenter: parent.verticalCenter }
                         Text {
                           id: labW
                           text: String(Model.COLUMN_LABELS[colId]).toUpperCase()
@@ -1170,12 +1166,12 @@ Item {
                           width: badgeT.implicitWidth + Style.space(10)
                           height: Style.space(16)
                           radius: height / 2
-                          color: colTasks.length > 0 ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.18) : Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.10)
+                          color: colTasks.length > 0 ? Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.18) : Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.10)
                           Text {
                             id: badgeT
                             anchors.centerIn: parent
                             text: String(colTasks.length)
-                            color: colTasks.length > 0 ? Color.accent : root.dimText
+                            color: colTasks.length > 0 ? Theme.Color.accent : root.dimText
                             font.family: Style.font.family
                             font.pixelSize: Style.font.caption
                             font.bold: true
@@ -1202,8 +1198,8 @@ Item {
                               height: cardInner.implicitHeight + Style.space(10)
                               radius: Style.cornerRadius
                               clip: true
-                              color: task.id === root.timer.activeTaskId ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.12) : Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.03)
-                              borderSpec: task.id === root.timer.activeTaskId ? Border.flat(Color.accent, 1.5) : Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+                              color: task.id === root.timer.activeTaskId ? Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.12) : Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.03)
+                              borderSpec: task.id === root.timer.activeTaskId ? Border.flat(Theme.Color.accent, 1.5) : Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
                               Column {
                                 id: cardInner
                                 anchors.fill: parent
@@ -1214,14 +1210,14 @@ Item {
                                   spacing: Style.space(6)
                                   Text {
                                     text: task.done ? "●" : "○"
-                                    color: task.done ? Color.accent : root.dimText
+                                    color: task.done ? Theme.Color.accent : root.dimText
                                     font.pixelSize: Style.font.body
                                     anchors.verticalCenter: parent.verticalCenter
                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.toggleTaskDone(task.id) }
                                   }
                                   Text {
                                     text: task.text
-                                    color: task.done ? root.dimText : Color.popups.text
+                                    color: task.done ? root.dimText : Theme.Color.popups.text
                                     font.family: Style.font.family
                                     font.pixelSize: Style.font.bodySmall
                                     font.strikeout: task.done
@@ -1232,7 +1228,7 @@ Item {
                                   Text {
                                     id: delBtn
                                     text: "−"
-                                    color: Color.urgent
+                                    color: Theme.Color.urgent
                                     font.pixelSize: Style.font.body
                                     font.bold: true
                                     anchors.verticalCenter: parent.verticalCenter
@@ -1259,7 +1255,7 @@ Item {
                                   }
                                   Text {
                                     text: "←"
-                                    color: colId === "backlog" ? root.dimText : Color.accent
+                                    color: colId === "backlog" ? root.dimText : Theme.Color.accent
                                     opacity: colId === "backlog" ? 0.35 : 1
                                     font.pixelSize: Style.font.bodySmall
                                     anchors.verticalCenter: parent.verticalCenter
@@ -1276,7 +1272,7 @@ Item {
                                   }
                                   Text {
                                     text: "→"
-                                    color: colId === "done" ? root.dimText : Color.accent
+                                    color: colId === "done" ? root.dimText : Theme.Color.accent
                                     opacity: colId === "done" ? 0.35 : 1
                                     font.pixelSize: Style.font.bodySmall
                                     anchors.verticalCenter: parent.verticalCenter
@@ -1294,7 +1290,7 @@ Item {
                                   Text {
                                     visible: root.ovSettings.obsidianEnabled === true
                                     text: (task.pushedToObsidian && task.pushedColumn === task.column) ? "↩" : "⬆"
-                                    color: (task.pushedToObsidian && task.pushedColumn === task.column) ? Color.urgent : Color.accent
+                                    color: (task.pushedToObsidian && task.pushedColumn === task.column) ? Theme.Color.urgent : Theme.Color.accent
                                     font.pixelSize: Style.font.caption
                                     font.bold: true
                                     anchors.verticalCenter: parent.verticalCenter
@@ -1311,7 +1307,7 @@ Item {
                                   }
                                   Text {
                                     text: task.id === root.timer.activeTaskId ? "● focused" : "○ focus"
-                                    color: task.id === root.timer.activeTaskId ? Color.accent : root.dimText
+                                    color: task.id === root.timer.activeTaskId ? Theme.Color.accent : root.dimText
                                     font.pixelSize: Style.font.caption
                                     anchors.verticalCenter: parent.verticalCenter
                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.setActiveTask(task.id) }
@@ -1365,8 +1361,8 @@ Item {
                   width: todoList.width
                   height: Math.max(34, todoInner.implicitHeight + Style.space(8))
                   radius: Style.cornerRadius / 2
-                  color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.03)
-                  borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+                  color: Qt.rgba(Theme.Color.popups.text.r, Theme.Color.popups.text.g, Theme.Color.popups.text.b, 0.03)
+                  borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
                   Row {
                     id: todoInner
                     anchors.left: parent.left
@@ -1377,14 +1373,14 @@ Item {
                     spacing: Style.space(8)
                     Text {
                       text: task.done ? "●" : "○"
-                      color: task.done ? Color.accent : root.dimText
+                      color: task.done ? Theme.Color.accent : root.dimText
                       font.pixelSize: Style.font.body
                       anchors.verticalCenter: parent.verticalCenter
                       MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.toggleTaskDone(task.id) }
                     }
                     Text {
                       text: task.text
-                      color: task.done ? root.dimText : Color.popups.text
+                      color: task.done ? root.dimText : Theme.Color.popups.text
                       font.family: Style.font.family
                       font.pixelSize: Style.font.body
                       font.strikeout: task.done
@@ -1396,7 +1392,7 @@ Item {
                     Text {
                       id: focusT
                       text: task.id === root.timer.activeTaskId ? "●" : "○"
-                      color: task.id === root.timer.activeTaskId ? Color.accent : root.dimText
+                      color: task.id === root.timer.activeTaskId ? Theme.Color.accent : root.dimText
                       font.pixelSize: Style.font.bodySmall
                       anchors.verticalCenter: parent.verticalCenter
                       MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.setActiveTask(task.id) }
@@ -1412,7 +1408,7 @@ Item {
                     Text {
                       id: delT
                       text: "−"
-                      color: Color.urgent
+                      color: Theme.Color.urgent
                       font.pixelSize: Style.font.body
                       font.bold: true
                       anchors.verticalCenter: parent.verticalCenter
@@ -1520,7 +1516,7 @@ Item {
                   visible: root.ovSettings.obsidianEnabled === true
                   width: parent.width
                   text: "Sync now (" + root.profilePendingPush + " pending)"
-                  foreground: Color.accent
+                  foreground: Theme.Color.accent
                   selected: true
                   enabled: root.profilePendingPush > 0 && !!root.ovSettings.obsidianVaultPath
                   onClicked: root.pushAllDoneToObsidian()
@@ -1529,7 +1525,7 @@ Item {
                   visible: root.ovSettings.obsidianEnabled === true
                   width: parent.width
                   text: root.vaultImporting ? "Importing…" : "Import from vault"
-                  foreground: Color.accent
+                  foreground: Theme.Color.accent
                   selected: true
                   enabled: !root.vaultImporting && !!root.ovSettings.obsidianVaultPath
                   onClicked: root.startVaultImport()
@@ -1607,7 +1603,7 @@ Item {
         spacing: 0
         Text {
           text: label
-          color: Color.popups.text
+          color: Theme.Color.popups.text
           font.family: Style.font.family
           font.pixelSize: Style.font.body
           font.bold: true
@@ -1643,7 +1639,7 @@ Item {
     spacing: Style.space(6)
     Text {
       text: label
-      color: Color.popups.text
+      color: Theme.Color.popups.text
       font.family: Style.font.family
       font.pixelSize: Style.font.bodySmall
       elide: Text.ElideRight
@@ -1663,7 +1659,7 @@ Item {
     Text {
       id: val
       text: value
-      color: Color.accent
+      color: Theme.Color.accent
       font.family: Style.font.family
       font.pixelSize: Style.font.caption
       font.bold: true

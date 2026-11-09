@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Commons as Theme
 import qs.Ui
 import "Model.js" as Model
 
@@ -33,12 +34,12 @@ Panel {
   readonly property string phase: timer.phase
   readonly property int remainingSec: timer.remainingSec
   readonly property real timerProgress: Model.progress(state)
-  // Theme-safe secondary tone. Color.muted is a raw theme value that can be
+  // Theme-safe secondary tone. Theme.Color.muted is a raw theme value that can be
   // near-invisible (e.g. rose-pine light sets muted near-white on a
   // near-white background); first-party shell code never uses it for text.
   // Deriving from foreground keeps contrast in dark AND light modes.
-  readonly property color dimText: Qt.darker(Color.foreground, 1.4)
-  readonly property color phaseColor: Model.phaseColor(phase, Color.accent, dimText, Color.urgent)
+  readonly property color dimText: Qt.darker(Theme.Color.foreground, 1.4)
+  readonly property color phaseColor: Model.phaseColor(phase, Theme.Color.accent, dimText, Theme.Color.urgent)
   readonly property string displayText: Model.formatTime(remainingSec)
   readonly property var activeTask: {
     var id = timer.activeTaskId
@@ -102,7 +103,7 @@ Panel {
         anchors.verticalCenter: parent.verticalCenter
         Text {
           text: parent.parent.parent.label
-          color: Color.foreground
+          color: Theme.Color.foreground
           font.family: Style.font.family
           font.pixelSize: Style.font.body
           font.bold: true
@@ -138,7 +139,7 @@ Panel {
     spacing: Style.space(6)
     Text {
       text: parent?.label ?? ""
-      color: Color.popups.text
+      color: Theme.Color.popups.text
       font.family: Style.font.family
       font.pixelSize: Style.font.caption
       elide: Text.ElideRight
@@ -158,7 +159,7 @@ Panel {
     Text {
       id: valText
       text: parent?.value ?? ""
-      color: Color.accent
+      color: Theme.Color.accent
       font.family: Style.font.family
       font.pixelSize: Style.font.caption
       font.bold: true
@@ -282,7 +283,7 @@ Panel {
           Text {
             id: markGlyph
             text: "\uf254"
-            color: Color.accent
+            color: Theme.Color.accent
             font.family: Style.font.family
             font.pixelSize: Style.font.body
             anchors.verticalCenter: parent.verticalCenter
@@ -290,7 +291,7 @@ Panel {
           Text {
             id: appName
             text: "FocusFlow"
-            color: Color.popups.text
+            color: Theme.Color.popups.text
             font.family: Style.font.family
             font.pixelSize: Style.font.bodySmall
             font.bold: true
@@ -305,7 +306,7 @@ Panel {
             id: syncDotBtn
             text: "●"
             fontSize: Style.font.caption
-            foreground: !root.ffSettings.obsidianEnabled ? root.dimText : (root.profilePendingPush > 0 ? Color.accent : root.dimText)
+            foreground: !root.ffSettings.obsidianEnabled ? root.dimText : (root.profilePendingPush > 0 ? Theme.Color.accent : root.dimText)
             tooltipText: !root.ffSettings.obsidianEnabled ? "Notes export off — open Vault sync" : (root.profilePendingPush > 0 ? (root.profilePendingPush + " pending — open Vault sync") : "Synced ✓ — open Vault sync")
             horizontalPadding: Style.space(2)
             verticalPadding: Style.space(1)
@@ -321,7 +322,7 @@ Panel {
           height: viewSegRow4.implicitHeight + Style.space(6)
           radius: height / 2
           color: "transparent"
-          borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+          borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
           Row {
             id: viewSegRow4
             anchors.centerIn: parent
@@ -329,7 +330,7 @@ Panel {
             Button {
               text: "Focus"
               width: (viewSegBox4.width - Style.space(6)) / root.enabledViewCount
-              foreground: root.view === "focus" ? Color.accent : root.dimText
+              foreground: root.view === "focus" ? Theme.Color.accent : root.dimText
               selected: root.view === "focus"
               radius: height / 2
               fontSize: Style.font.caption
@@ -341,7 +342,7 @@ Panel {
               text: "Board"
               visible: root.viewEnabled("kanban")
               width: (viewSegBox4.width - Style.space(6)) / root.enabledViewCount
-              foreground: root.view === "kanban" ? Color.accent : root.dimText
+              foreground: root.view === "kanban" ? Theme.Color.accent : root.dimText
               selected: root.view === "kanban"
               radius: height / 2
               fontSize: Style.font.caption
@@ -353,7 +354,7 @@ Panel {
               text: "Todo"
               visible: root.viewEnabled("todo")
               width: (viewSegBox4.width - Style.space(6)) / root.enabledViewCount
-              foreground: root.view === "todo" ? Color.accent : root.dimText
+              foreground: root.view === "todo" ? Theme.Color.accent : root.dimText
               selected: root.view === "todo"
               radius: height / 2
               fontSize: Style.font.caption
@@ -364,7 +365,7 @@ Panel {
             Button {
               text: "Setup"
               width: (viewSegBox4.width - Style.space(6)) / root.enabledViewCount
-              foreground: root.view === "settings" ? Color.accent : root.dimText
+              foreground: root.view === "settings" ? Theme.Color.accent : root.dimText
               selected: root.view === "settings"
               radius: height / 2
               fontSize: Style.font.caption
@@ -485,7 +486,7 @@ Panel {
         Button {
           id: bellBtn
           text: root.ffSettings.soundMuted ? "\uf1f6" : "\uf0f3"
-          foreground: root.ffSettings.soundMuted ? Color.urgent : root.dimText
+          foreground: root.ffSettings.soundMuted ? Theme.Color.urgent : root.dimText
           horizontalPadding: Style.space(2)
           verticalPadding: Style.space(2)
           tooltipText: root.ffSettings.soundMuted ? "Unmute all sound (M)" : "Mute all sound (M)"
@@ -497,7 +498,7 @@ Panel {
         Button {
           id: gearBtn
           text: ""
-          foreground: root.view === "settings" ? Color.accent : root.dimText
+          foreground: root.view === "settings" ? Theme.Color.accent : root.dimText
           horizontalPadding: Style.space(2)
           verticalPadding: Style.space(2)
           onClicked: root.toggleSettings()
@@ -517,8 +518,8 @@ Panel {
             width: transportRow.implicitWidth + Style.space(8)
             height: transportRow.implicitHeight + Style.space(8)
             radius: height / 2
-            color: Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.08)
-            border.color: Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.18)
+            color: Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.08)
+            border.color: Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.18)
             border.width: 1
             anchors.verticalCenter: parent.verticalCenter
 
@@ -528,7 +529,7 @@ Panel {
               spacing: Style.space(1)
               Button {
                 text: root.isRunning ? "Pause" : (root.isPaused ? "Resume" : "Start")
-                foreground: Color.accent
+                foreground: Theme.Color.accent
                 selected: true
                 radius: height / 2
                 fontSize: Style.font.caption
@@ -591,7 +592,7 @@ Panel {
         Button {
           id: slimPause
           text: root.isRunning ? "Pause" : (root.isPaused ? "Resume" : "Start")
-          foreground: Color.accent
+          foreground: Theme.Color.accent
           fontSize: Style.font.caption
           horizontalPadding: Style.space(3)
           verticalPadding: Style.space(1)
@@ -623,14 +624,14 @@ Panel {
           Text {
             id: sessWorkDot
             text: "●"
-            color: Color.accent
+            color: Theme.Color.accent
             font.pixelSize: Style.font.caption
             anchors.verticalCenter: parent.verticalCenter
           }
           Text {
             id: sessWorkVal
             text: "Work " + Math.round((root.ffSettings.workSec || 1500) / 60) + "m"
-            color: Color.popups.text
+            color: Theme.Color.popups.text
             font.family: Style.font.family
             font.pixelSize: Style.font.caption
             anchors.verticalCenter: parent.verticalCenter
@@ -671,7 +672,7 @@ Panel {
           Text {
             id: progLabel
             text: root.profileDoneCount + "/" + root.profileTasks.length + " done"
-            color: Color.accent
+            color: Theme.Color.accent
             font.family: Style.font.family
             font.pixelSize: Style.font.caption
             font.bold: true
@@ -685,13 +686,13 @@ Panel {
             Rectangle {
               anchors.fill: parent
               radius: 2
-              color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.15)
+              color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.15)
             }
             Rectangle {
               height: parent.height
               width: parent.width * (root.profileTasks.length > 0 ? root.profileDoneCount / root.profileTasks.length : 0)
               radius: 2
-              color: Color.accent
+              color: Theme.Color.accent
             }
           }
           Text {
@@ -920,8 +921,8 @@ Panel {
             width: parent.width
             height: pathCardRow.implicitHeight + Style.space(12)
             radius: Style.cornerRadius
-            color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.05)
-            borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+            color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.05)
+            borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
             Row {
               id: pathCardRow
               anchors.fill: parent
@@ -929,7 +930,7 @@ Panel {
               spacing: Style.space(6)
               Text {
                 text: root.vaultDestForActive()
-                color: Color.popups.text
+                color: Theme.Color.popups.text
                 font.family: Style.font.family
                 font.pixelSize: Style.font.caption
                 elide: Text.ElideMiddle
@@ -967,7 +968,7 @@ Panel {
           Button {
             width: parent.width
             text: "Sync now"
-            foreground: Color.accent
+            foreground: Theme.Color.accent
             selected: true
             fontSize: Style.font.caption
             enabled: (Model.tasksForProfile(root.state, root.activeProfileId).filter(function(t){return !t.pushedToObsidian || t.pushedColumn !== t.column}).length > 0) && !!root.ffSettings.obsidianVaultPath
@@ -992,7 +993,7 @@ Panel {
         Button {
           id: helpBtn
           text: "?"
-          foreground: Color.urgent
+          foreground: Theme.Color.urgent
           fontSize: Style.font.caption
           horizontalPadding: Style.space(3)
           verticalPadding: Style.space(1)
@@ -1067,7 +1068,7 @@ Panel {
                   required property var modelData
                   property var profile: modelData
                   text: profile.name
-                  foreground: profile.id === root.activeProfileId ? Color.accent : root.dimText
+                  foreground: profile.id === root.activeProfileId ? Theme.Color.accent : root.dimText
                   fontSize: Style.font.caption
                   horizontalPadding: Style.space(4)
                   verticalPadding: Style.space(2)
@@ -1081,7 +1082,7 @@ Panel {
           Button {
             id: addProfileBtn
             text: "+"
-            foreground: Color.accent
+            foreground: Theme.Color.accent
             fontSize: Style.font.caption
             horizontalPadding: Style.space(4)
             verticalPadding: Style.space(2)
@@ -1113,7 +1114,7 @@ Panel {
             Button {
               id: createBtn
               text: root.isRenaming ? "Save" : "Create"
-              foreground: Color.accent
+              foreground: Theme.Color.accent
               fontSize: Style.font.caption
               enabled: root.newProfileName.trim().length > 0
               onClicked: root.confirmProfileName()
@@ -1149,7 +1150,7 @@ Panel {
           Button {
             id: renameBtn
             text: "Rename"
-            foreground: Color.accent
+            foreground: Theme.Color.accent
             fontSize: Style.font.caption
             tooltipText: "Rename this space"
             onClicked: {
@@ -1164,7 +1165,7 @@ Panel {
           Button {
             id: deleteProfileBtn
             text: "Remove"
-            foreground: Color.urgent
+            foreground: Theme.Color.urgent
             fontSize: Style.font.caption
             tooltipText: "Remove this space (asks Yes/No)"
             onClicked: { confirmDeleteProfile.opened = true; keyCatcher.forceActiveFocus() }
@@ -1192,7 +1193,7 @@ Panel {
         Button {
           id: addButton
           text: "+"
-          foreground: Color.accent
+          foreground: Theme.Color.accent
           onClicked: root.addTaskFromInput()
         }
       }
@@ -1245,9 +1246,9 @@ Panel {
             width: plainList.width
             height: taskRow.implicitHeight + Style.space(8)
             radius: Style.cornerRadius / 2
-            color: plainDelegate.isHovered ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.07)
-                  : task.done ? Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.08) : "transparent"
-            border.color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.15)
+            color: plainDelegate.isHovered ? Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.07)
+                  : task.done ? Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.08) : "transparent"
+            border.color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.15)
             border.width: 0
 
             required property var modelData
@@ -1270,15 +1271,15 @@ Panel {
                 width: 18
                 height: 18
                 radius: 4
-                color: task.done ? Color.accent : "transparent"
-                border.color: task.done ? Color.accent : root.dimText
+                color: task.done ? Theme.Color.accent : "transparent"
+                border.color: task.done ? Theme.Color.accent : root.dimText
                 border.width: 1.5
                 anchors.verticalCenter: parent.verticalCenter
 
                 Text {
                   anchors.centerIn: parent
                   text: "✓"
-                  color: Color.popups.background
+                  color: Theme.Color.popups.background
                   font.pixelSize: 11
                   font.bold: true
                   visible: task.done
@@ -1294,7 +1295,7 @@ Panel {
               Text {
                 id: taskText
                 text: task.text
-                color: task.done ? root.dimText : Color.popups.text
+                color: task.done ? root.dimText : Theme.Color.popups.text
                 font.family: Style.font.family
                 font.pixelSize: Style.font.body
                 font.strikeout: task.done
@@ -1309,7 +1310,7 @@ Panel {
               Button {
                 id: focusBtn
                 text: task.id === root.timer.activeTaskId ? "●" : "○"
-                foreground: task.id === root.timer.activeTaskId ? Color.accent : root.dimText
+                foreground: task.id === root.timer.activeTaskId ? Theme.Color.accent : root.dimText
                 onClicked: root.ff.setActiveTask(task.id)
                 anchors.verticalCenter: parent.verticalCenter
               }
@@ -1326,8 +1327,8 @@ Panel {
               width: hoverRow.implicitWidth + Style.space(14)
               height: hoverRow.implicitHeight + Style.space(7)
               radius: Style.cornerRadius / 2
-              color: Color.popups.background
-              border.color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.25)
+              color: Theme.Color.popups.background
+              border.color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.25)
               border.width: 1
               Row {
                 id: hoverRow
@@ -1370,7 +1371,7 @@ Panel {
                 Text {
                   visible: root.ffSettings.obsidianEnabled === true
                   text: (task.pushedToObsidian && task.pushedColumn === task.column) ? "↩" : "⬆"
-                  color: (task.pushedToObsidian && task.pushedColumn === task.column) ? Color.urgent : Color.accent
+                  color: (task.pushedToObsidian && task.pushedColumn === task.column) ? Theme.Color.urgent : Theme.Color.accent
                   font.pixelSize: Style.font.bodySmall
                   font.bold: true
                   MouseArea {
@@ -1386,7 +1387,7 @@ Panel {
                 }
                 Text {
                   text: "-"
-                  color: Color.urgent
+                  color: Theme.Color.urgent
                   font.pixelSize: Style.font.bodySmall
                   font.bold: true
                   MouseArea {
@@ -1442,8 +1443,8 @@ Panel {
                 BorderSurface {
                   anchors.fill: parent
                   radius: Style.cornerRadius
-                  color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.045)
-                  borderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+                  color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.045)
+                  borderSpec: Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
                 }
 
                 Column {
@@ -1469,19 +1470,19 @@ Panel {
                     width: countText.implicitWidth + Style.space(8)
                     height: Style.space(14)
                     radius: height/2
-                    color: count > 0 ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.18) : Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.10)
+                    color: count > 0 ? Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.18) : Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.10)
                     Text {
                       id: countText
                       anchors.centerIn: parent
                       text: String(parent.count)
-                      color: parent.count > 0 ? Color.accent : root.dimText
+                      color: parent.count > 0 ? Theme.Color.accent : root.dimText
                       font.family: Style.font.family
                       font.pixelSize: Style.font.caption - 1
                       font.bold: true
                     }
                   }
                 }
-                Rectangle { width: parent.width; height: 1; color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.10); radius: 1 }
+                Rectangle { width: parent.width; height: 1; color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.10); radius: 1 }
 
                 // Per-column vertical scroll so todo with 20+ cards isn't invisible beyond 180px cap
                 Flickable {
@@ -1510,8 +1511,8 @@ Panel {
                     height: taskCardCol.implicitHeight + Style.space(6)
                     radius: Style.cornerRadius
                     clip: true
-                    color: task.id === root.timer.activeTaskId ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.14) : Qt.rgba(Color.popups.background.r, Color.popups.background.g, Color.popups.background.b, 0.04)
-                    borderSpec: task.id === root.timer.activeTaskId ? Border.flat(Color.accent, 1.5) : Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, 1)
+                    color: task.id === root.timer.activeTaskId ? Qt.rgba(Theme.Color.accent.r, Theme.Color.accent.g, Theme.Color.accent.b, 0.14) : Qt.rgba(Theme.Color.popups.background.r, Theme.Color.popups.background.g, Theme.Color.popups.background.b, 0.04)
+                    borderSpec: task.id === root.timer.activeTaskId ? Border.flat(Theme.Color.accent, 1.5) : Border.localOrSurfaceSpec("popups", "border", Theme.Color.popups.border, Theme.Color.popups.border, 1)
                     HoverHandler { id: kanbanHover; onHoveredChanged: kanbanCard.isHovered = hovered }
 
                     // Left accent for active task — stable, not floating
@@ -1521,7 +1522,7 @@ Panel {
                       anchors.left: parent.left
                       anchors.top: parent.top
                       anchors.bottom: parent.bottom
-                      color: Color.accent
+                      color: Theme.Color.accent
                       radius: 1
                     }
 
@@ -1540,14 +1541,14 @@ Panel {
                         Text {
                           visible: task.id === root.timer.activeTaskId
                           text: "●"
-                          color: Color.accent
+                          color: Theme.Color.accent
                           font.pixelSize: Style.font.bodySmall
                           font.bold: true
                           anchors.verticalCenter: parent.verticalCenter
                         }
                         Text {
                           text: task.text
-                          color: task.id === root.timer.activeTaskId ? Color.accent : Color.popups.text
+                          color: task.id === root.timer.activeTaskId ? Theme.Color.accent : Theme.Color.popups.text
                           font.family: Style.font.family
                           font.pixelSize: Style.font.bodySmall
                           font.bold: task.id === root.timer.activeTaskId
@@ -1576,13 +1577,13 @@ Panel {
                           Rectangle {
                             anchors.fill: parent
                             radius: 2
-                            color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.15)
+                            color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.15)
                           }
                           Rectangle {
                             height: parent.height
                             width: parent.width * Math.max(0, Math.min(1, parent.parent.est > 0 ? parent.parent.spent / parent.parent.est : 0))
                             radius: 2
-                            color: Color.accent
+                            color: Theme.Color.accent
                           }
                         }
                         Text {
@@ -1607,7 +1608,7 @@ Panel {
 
                           Text {
                             text: "←"
-                            color: colId === "backlog" ? root.dimText : Color.accent
+                            color: colId === "backlog" ? root.dimText : Theme.Color.accent
                             font.pixelSize: Style.font.body
                             opacity: colId === "backlog" ? 0.35 : 1
                             MouseArea {
@@ -1624,7 +1625,7 @@ Panel {
 
                           Text {
                             text: "→"
-                            color: colId === "done" ? root.dimText : Color.accent
+                            color: colId === "done" ? root.dimText : Theme.Color.accent
                             font.pixelSize: Style.font.body
                             opacity: colId === "done" ? 0.35 : 1
                             MouseArea {
@@ -1673,7 +1674,7 @@ Panel {
                         Text {
                           visible: root.ffSettings.obsidianEnabled === true
                           text: (task.pushedToObsidian && task.pushedColumn === task.column) ? "↩" : "⬆"
-                          color: (task.pushedToObsidian && task.pushedColumn === task.column) ? Color.urgent : Color.accent
+                          color: (task.pushedToObsidian && task.pushedColumn === task.column) ? Theme.Color.urgent : Theme.Color.accent
                           font.pixelSize: Style.font.body
                           font.bold: true
                           anchors.right: parent.right
@@ -1695,7 +1696,7 @@ Panel {
                     // – at right-hand top corner to remove task (kanban) — asks Yes/No before removing
                     Text {
                       text: "-"
-                      color: Color.urgent
+                      color: Theme.Color.urgent
                       font.pixelSize: 12
                       font.bold: true
                       z: 10
@@ -1803,7 +1804,7 @@ Panel {
 
       Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(Color.background.r, Color.background.g, Color.background.b, 0.7)
+        color: Qt.rgba(Theme.Color.background.r, Theme.Color.background.g, Theme.Color.background.b, 0.7)
         MouseArea { anchors.fill: parent; onClicked: confirmDeleteDone.closeDialog() }
 
         BorderSurface {
@@ -1811,8 +1812,8 @@ Panel {
           width: Math.min(parent.width - Style.space(32), Style.space(370))
           height: contentTopInset + contentBottomInset + doneMsg.implicitHeight + Style.space(16) + Style.space(34)
           anchors.centerIn: parent
-          color: Color.background
-          borderSpec: Border.flat(Color.accent, Style.normalBorderWidth)
+          color: Theme.Color.background
+          borderSpec: Border.flat(Theme.Color.accent, Style.normalBorderWidth)
           padding: Style.space(18)
           radius: Style.cornerRadius
           MouseArea { anchors.fill: parent; onClicked: {} }
@@ -1830,7 +1831,7 @@ Panel {
               anchors.right: parent.right
               anchors.top: parent.top
               text: "Done — \"" + confirmDeleteDone.taskText + "\" is finished. Archive as - [x] in notes and remove from board, or delete everywhere (also removes from notes)?"
-              color: Color.foreground
+              color: Theme.Color.foreground
               font.family: Style.font.family
               font.pixelSize: Style.font.title
               wrapMode: Text.WordWrap
@@ -1851,16 +1852,16 @@ Panel {
                   width: index === 1 ? Style.space(96) : Style.space(80)
                   height: Style.space(34)
                   color: selected
-                    ? (destructive ? Qt.rgba(Color.urgent.r, Color.urgent.g, Color.urgent.b, 0.22) : Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.08))
+                    ? (destructive ? Qt.rgba(Theme.Color.urgent.r, Theme.Color.urgent.g, Theme.Color.urgent.b, 0.22) : Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.08))
                     : "transparent"
                   borderSpec: Border.flat(destructive
-                    ? (selected ? Color.urgent : Qt.rgba(Color.urgent.r, Color.urgent.g, Color.urgent.b, 0.56))
-                    : (selected ? Color.accent : Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.38)), Style.normalBorderWidth)
+                    ? (selected ? Theme.Color.urgent : Qt.rgba(Theme.Color.urgent.r, Theme.Color.urgent.g, Theme.Color.urgent.b, 0.56))
+                    : (selected ? Theme.Color.accent : Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.38)), Style.normalBorderWidth)
                   radius: 0
                   Text {
                     anchors.centerIn: parent
                     text: modelData
-                    color: destructive ? (selected ? Color.urgent : Color.foreground) : (selected ? Color.accent : Color.foreground)
+                    color: destructive ? (selected ? Theme.Color.urgent : Theme.Color.foreground) : (selected ? Theme.Color.accent : Theme.Color.foreground)
                     font.family: Style.font.family
                     font.pixelSize: Style.font.caption
                   }
@@ -1900,7 +1901,7 @@ Panel {
 
       Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(Color.background.r, Color.background.g, Color.background.b, 0.72)
+        color: Qt.rgba(Theme.Color.background.r, Theme.Color.background.g, Theme.Color.background.b, 0.72)
         MouseArea { anchors.fill: parent; onClicked: root.showHelp = false }
       }
 
@@ -1910,8 +1911,8 @@ Panel {
         height: helpCol.implicitHeight + Style.space(24)
         anchors.centerIn: parent
         radius: Style.cornerRadius
-        color: Color.popups.background
-        border.color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.3)
+        color: Theme.Color.popups.background
+        border.color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.3)
         border.width: 1
         MouseArea { anchors.fill: parent; onClicked: {} }
 
@@ -1923,7 +1924,7 @@ Panel {
 
           Text {
             text: "Bindings & tips"
-            color: Color.popups.text
+            color: Theme.Color.popups.text
             font.family: Style.font.family
             font.pixelSize: Style.font.body
             font.bold: true
@@ -1949,7 +1950,7 @@ Panel {
               spacing: Style.space(8)
               Text {
                 text: modelData.key
-                color: Color.accent
+                color: Theme.Color.accent
                 font.family: Style.font.family
                 font.pixelSize: Style.font.caption
                 font.bold: true
@@ -1958,7 +1959,7 @@ Panel {
               }
               Text {
                 text: modelData.desc
-                color: Color.popups.text
+                color: Theme.Color.popups.text
                 font.family: Style.font.family
                 font.pixelSize: Style.font.caption
                 wrapMode: Text.Wrap
@@ -1971,7 +1972,7 @@ Panel {
 
           Button {
             text: "Close"
-            foreground: Color.accent
+            foreground: Theme.Color.accent
             fontSize: Style.font.caption
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: root.showHelp = false
