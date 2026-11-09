@@ -1074,6 +1074,24 @@ Panel {
                   verticalPadding: Style.space(2)
                   tooltipText: profile.id === root.activeProfileId ? ("Active space — " + profile.name) : ("Switch to " + profile.name)
                   onClicked: root.ff.setActiveProfile(profile.id)
+                  onRightClicked: spaceMenu.popup()
+                  SpaceMenu {
+                    id: spaceMenu
+                    canDelete: profile.id !== "default"
+                    onRenameRequested: {
+                      root.ff.setActiveProfile(profile.id)
+                      root.newProfileName = profile.name
+                      profileInput.text = profile.name
+                      root.isRenaming = true
+                      root.showProfileCreator = true
+                      Qt.callLater(function() { profileInput.forceActiveFocus(); profileInput.selectAll() })
+                    }
+                    onDeleteRequested: {
+                      root.ff.setActiveProfile(profile.id)
+                      confirmDeleteProfile.opened = true
+                      keyCatcher.forceActiveFocus()
+                    }
+                  }
                 }
               }
             }
