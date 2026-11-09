@@ -43,5 +43,5 @@ If a `.cli-lock` directory remains after a killed CLI process, verify no CLI is
 running before removing that directory.
 
 For code changes, keep model behavior in `Model.js` and reuse it from the CLI.
-Run `node --test tests/cli.test.js`. Tests must use temporary state files and
+Run `node --test tests/*.test.js`. Tests must use temporary state files and
 must never touch the user's live application state.

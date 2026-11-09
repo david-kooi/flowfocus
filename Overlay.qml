@@ -9,10 +9,8 @@ import qs.Commons as Theme
 import qs.Ui
 import "Model.js" as Model
 
-// FocusFlow workspace overlay — fullscreen 3-region layout (rail + main +
-// side) for the same state the popup manages. READ-ONLY locally: all
-// mutations go through the bar widget's `mutate` IPC (single writer), this
-// side watches the state file for live updates (1s while the timer runs).
+// FocusFlow workspace overlay. Shares persisted state with the bar widget;
+// reloads adopt valid snapshots without writing them back.
 Item {
   id: root
 
@@ -36,7 +34,7 @@ Item {
   readonly property string shellPath: (Quickshell.env("OMARCHY_PATH") || "") + "/shell"
   readonly property string pluginDir: Qt.resolvedUrl(".").toString().replace("file://", "").replace(/\/+$/, "")
 
-  // ---- State (watched, never written here) ----
+  // ---- Shared persisted state ----
   property var state: Model.defaultState()
   property bool loaded: false
 
@@ -86,16 +84,8 @@ Item {
     // permanently detaches inotify watchers (frozen display + lost updates).
     atomicWrites: false
     printErrors: false
-    onLoaded: {
-      root.state = Model.parse(text())
-      root.loaded = true
-    }
-    onTextChanged: {
-      if (root.loaded) {
-        var ext = Model.parseOrNull(text())
-        if (ext) root.state = ext
-      }
-    }
+    onLoaded: root.adoptState(text())
+    onTextChanged: root.adoptState(text())
     // Per the FileView contract, watched content only refreshes via
     // reload() — without this, text() serves the load-time snapshot forever.
     onFileChanged: reload()
@@ -137,14 +127,22 @@ Item {
     repeat: true
     running: root.opened
     onTriggered: {
-      if (root.loaded) stateFile.reload()
+      stateFile.reload()
     }
   }
 
   // ---- Local dispatcher: every overlay action runs here, directly on
   // watched state (no process spawn, instant, no failure mode). The bar
   // adopts our saves via its file watch; we adopt its tick saves via ours.
+  function adoptState(raw) {
+    var incoming = Model.parseOrNull(raw)
+    if (!incoming) return
+    root.state = incoming
+    root.loaded = true
+  }
+
   function ovSave() {
+    if (!root.loaded) return
     stateFile.setText(Model.serialize(root.state))
   }
 
@@ -463,8 +461,8 @@ Item {
         if (typeof args.barH === "number" && isFinite(args.barH) && args.barH >= 0) root.anchorBarH = args.barH
       }
     } catch (e) {}
-    try { root.state = Model.parse(stateFile.text()) } catch (e) {}
-    root.loaded = true
+    root.adoptState(stateFile.text())
+    stateFile.reload()
     root.opened = true
     keyGrab.forceActiveFocus()
   }
