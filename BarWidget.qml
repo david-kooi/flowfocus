@@ -14,7 +14,7 @@ import "Model.js" as Model
 //
 // State is persisted to ~/.local/state/omarchy/focusflow.json via FileView.
 // The FileView reads on load; every mutation calls saveState() which writes
-// the full JSON atomically.
+// the full JSON in place, preserving the file watch.
 BarWidget {
   id: root
   moduleName: "flowfocus"
@@ -60,27 +60,35 @@ BarWidget {
     // permanently detaches inotify watchers (frozen display + lost updates).
     atomicWrites: false
     printErrors: false
-    onLoaded: {
-      // Never resume into running at load: freeze where the user stopped so
-      // a reboot can't fire a stale alarm or autostart a phase unattended.
-      root.state = Model.settleLoadedTimer(Model.parse(text()))
-      root.loaded = true
-      root.syncSettingsFromShellJson()
-      root.saveState()
-      root.applyTickState()
-    }
-    onTextChanged: {
-      // External writer (overlay) changed the file — adopt it so the next
-      // tick or action never clobbers it. Own saves re-parse harmlessly.
-      // parseOrNull: torn writes are ignored, never adopted.
-      if (root.loaded) {
-        var ext = Model.parseOrNull(text())
-        if (ext) root.state = ext
+    onLoaded: root.adoptState(text())
+    onTextChanged: root.adoptState(text())
+    onLoadFailed: function(error) {
+      // Only a genuinely missing file on first use permits initialization.
+      // Empty, malformed and unreadable existing files must never be reset.
+      if (!root.loaded && error === FileViewError.FileNotFound) {
+        root.state = Model.defaultState()
+        root.loaded = true
+        root.syncSettingsFromShellJson()
+        root.saveState()
       }
     }
     // Per the FileView contract, watched content only refreshes via
     // reload() — without this, text() serves the load-time snapshot forever.
     onFileChanged: reload()
+  }
+
+  function adoptState(raw) {
+    var incoming = Model.parseOrNull(raw)
+    if (!incoming) return
+    var firstLoad = !root.loaded
+    root.state = firstLoad ? Model.settleLoadedTimer(incoming) : incoming
+    root.loaded = true
+    // FileView emits loaded on reloads too. Only initialize once, and never
+    // echo a reload back to disk (which races other writers and reloads).
+    if (firstLoad) {
+      root.syncSettingsFromShellJson()
+      root.applyTickState()
+    }
   }
 
   function saveState() {
